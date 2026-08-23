@@ -24,14 +24,14 @@ under `glance-port/`.
 
 ## glanceapp/glance → this port
 
-📉 690 Go lines → **1,232 Java lines**<br>
+📉 690 Go lines → **1,236 Java lines**<br>
 📁 10 files → **20 files**<br>
-⚡ 8,309 → **1,204** nanoseconds per refresh decision<br>
+⚡ 8,309 → **1,138** nanoseconds per refresh decision<br>
 🎯 40 of 40 workload steps agree → **40 of 40**<br>
 🖼️ 0 of 5,441 markup bytes differ → **0**<br>
 🖥️ 0 changed screen regions → **0**<br>
 👀 reload required to see a refresh → **91** milliseconds, ninety-fifth percentile<br>
-🧪 0 tests → **46 tests**
+🧪 0 tests → **47 tests**
 
 Full method and the numbers that did *not* make this list:
 [`bench/REPORT.md`](bench/REPORT.md).
@@ -44,7 +44,7 @@ Full method and the numbers that did *not* make this list:
 💬 **597** exchanges with the model<br>
 ✍️ **524,392** tokens written by the model, **212,187,110** counting everything sent and re-sent<br>
 🙋 **0** questions to a human<br>
-🧪 **46** tests
+🧪 **47** tests
 
 ```bash
 python toolkit/tokens.py --port glance    # turns, tokens, elapsed and active time

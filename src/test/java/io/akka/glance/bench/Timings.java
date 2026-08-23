@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.Test;
 
 /**
  * The port's half of the benchmark's timing.
@@ -29,8 +28,19 @@ import org.junit.jupiter.api.Test;
  * <p>Windows are sized from a pilot so that each one runs for tens of milliseconds, and
  * five of them are run and the median taken: a single sized window still moves by enough
  * between runs to reorder a table.
+ *
+ * <p>This is a measuring instrument rather than a check: it asserts nothing and it writes a
+ * file. It has a {@code main} instead of a {@code @Test} for that reason — a class that
+ * only runs when somebody names it on the command line reads, in a build's totals,
+ * exactly like a test that passed.
+ *
+ * <pre>
+ * mvn -o test-compile
+ * mvn -o dependency:build-classpath -Dmdep.outputFile=target/test-cp.txt -Dmdep.includeScope=test
+ * java -cp "target/test-classes;target/classes;$(cat target/test-cp.txt)"  *     io.akka.glance.bench.Timings
+ * </pre>
  */
-class Timings {
+public final class Timings {
 
   private static final int WINDOWS = 5;
   private static final long TARGET_WINDOW_NANOS = 50_000_000L;
@@ -74,7 +84,10 @@ class Timings {
 
   private record Case(String name, List<FeedSpec> specs, List<FeedResult> results, boolean render) {}
 
-  @Test
+  public static void main(String[] args) throws IOException {
+    new Timings().writeTimings();
+  }
+
   void writeTimings() throws IOException {
     var twoFeeds =
         List.of(new FeedSpec("http://a", null, 0), new FeedSpec("http://b", null, 0));
