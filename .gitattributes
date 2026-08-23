@@ -1,0 +1,7 @@
+# The markup fixtures under src/test/resources/original/ are compared byte for byte
+# against what this project renders, and the vendored assets are compared against what
+# glance serves. A checkout that turned their line endings into CRLF would fail those
+# comparisons on one platform and pass on another.
+* text=auto eol=lf
+*.woff2 binary
+*.png binary
