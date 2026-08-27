@@ -1,102 +1,1267 @@
 # Acknowledgements
 
-This project is a port of **[glanceapp/glance](https://github.com/glanceapp/glance)**.
+This is a rebuild of [glanceapp/glance](https://github.com/glanceapp/glance) at `20672ee`,
+by Svilen Markov and its contributors, on Akka. The original is licensed
+**AGPL-3.0**, and so is this: `LICENSE` carries the same terms.
 
-## Licence
+## What is copied verbatim
 
-glance is under the **GNU Affero General Public License, version 3**
-(`glance/LICENSE`, read rather than taken from a badge). The repository carries no
-per-file copyright headers and no `AUTHORS` file; its commits are authored by Svilen
-Markov and its contributors.
+Three directories hold the original's own files, unchanged. `RENDERING.md` R3 asks a port
+with a graphical surface to ship the source's front end rather than build one, and for a
+system whose whole surface is templated that means the templates as well as the style
+sheets.
 
-This port **ships parts of glance verbatim** — see below — so it is a derived work and
-carries the same licence. `LICENSE` in this repository is glance's own AGPL-3.0 text,
-copied unchanged. The repository is private; making it public is a separate decision,
-and under the AGPL that decision comes with the obligation to offer the corresponding
-source to anyone the service is offered to over a network.
+Verbatim-copy: `src/main/resources/glance/static`
+Verbatim-copy: `src/main/resources/glance/templates`
+Verbatim-copy: `src/main/resources/glance/default.yml`
 
-## Copied verbatim
+- **`static/`** — 42 files: the style sheets, the scripts, the JetBrains Mono font and the
+  four service marks. One of them is changed: `js/page.js`, whose data layer subscribes to
+  a stream rather than asking for the page's contents once (`RENDERING.md` R1). The change
+  is 44 lines added and 5 changed, all of them in the two functions that fetch and apply
+  the contents; nothing about the components, the styling, the routes or the layout is
+  touched. `diff -rq` against the original's directory names that one file and no other.
+- **`templates/`** — 44 files: every `html/template` the original renders, unchanged. They
+  are executed by `io.akka.glance.gotemplate`, a Go template engine written for this port,
+  rather than transcribed into Java.
+- **`default.yml`** — the original's own `docs/glance.yml`, shipped as the configuration a
+  fresh install starts from.
 
-Every file listed here was taken from a running glance and is unchanged except where
-this section says otherwise. The list was produced by `python toolkit/copied_strings.py
-glance`, which pulls every string of ten characters or more out of the rebuild and finds
-the ones that also occur in the clone — not from memory.
+## What is reproduced rather than copied
 
-| File | What it is | Changed? |
-|---|---|---|
-| `src/main/resources/static/css/bundle.css` | glance's stylesheet, as its own server assembles and serves it | Line endings normalised to `\n`. Nothing else. |
-| `src/main/resources/static/js/popover.js` | the pop-up helper the page shell uses | Line endings only. |
-| `src/main/resources/static/js/masonry.js` | the column layout the page shell uses | Line endings only. |
-| `src/main/resources/static/js/utils.js` | small helpers the page shell uses | Line endings only. |
-| `src/main/resources/static/js/templating.js` | element helpers the page shell uses | Line endings only. |
-| `src/main/resources/static/fonts/JetBrainsMono-Regular.woff2` | the page's typeface, as glance serves it | Unchanged. |
-| `src/main/resources/static/js/page.js` | the page's own script | **Changed.** One function replaced: where it fetched the page's content over HTTP it now reads the content embedded in the document and subscribes to an event stream. Six lines added inside `setupPage` to redraw when a frame arrives. Everything else — the theme picker, the collapsible lists, the relative-time labels, the search boxes, the carousels — is glance's, unchanged. |
-| `src/main/resources/page.html` | the page shell glance renders around its content | **Changed.** Four values replaced by placeholders the port fills in (`{{SLUG}}`, `{{TITLE}}`, `{{NAV}}`, `{{CONTENT}}`), one `<template>` element added to carry the first render's content, and the web-app manifest link removed. The markup, the inline logo, the theme picker and the mobile navigation are glance's. |
+Everything else in `src/main/java` was written for this port. It nevertheless shares a
+great deal of *text* with the original, and deliberately: a rebuild that reads the same
+configuration files, answers on the same routes, refuses the same mistakes with the same
+words and reads the same fields out of somebody else's API has to carry the same strings.
+That is not incidental — it is most of what makes it a port rather than a similar program.
 
-Declared wholesale, so that the check reads them as copied rather than asking for a
-sentence per string inside them:
+The list below is every one of them: **523** literals of ten characters
+or more that occur in both, grouped by the file they sit in. It is generated by
+`glance-port/probes/services/acknowledgements.py` from `toolkit/copied_strings.py`,
+so it is what the check finds rather than what anybody remembered.
 
-    Verbatim-copy: src/main/resources/static/
-    Verbatim-copy: src/main/resources/page.html
-    Verbatim-copy: src/test/resources/original/
+### `src/main/java/io/akka/glance/api/ApiEndpoint.java`
 
-## Reproduced, not copied
+The routes, the statuses and the cookie names a caller sees. A port that answered on different paths would not be a port.
 
-The widget markup is a transcription rather than a copy: glance renders it from Go
-templates, which do not run on this stack, so
-`src/main/java/io/akka/glance/domain/WidgetRenderer.java` and `PageRenderer.java` emit the
-same bytes from Java. They were held to fragments cut out of the running original's own
-response — `src/test/resources/original/*.html` — which are themselves glance's output and
-are copied.
+```text
+/api/healthz
+/api/set-theme/{key}
+```
 
-The messages a widget shows are glance's own words, reproduced so that a page reads the
-same: `failed to retrieve any content`, `failed to retrieve some of the content: missing
-%d RSS feeds`, `No items were returned from the feeds.`, and the `ERROR` heading. Each was
-read off the original's rendered response, not from memory.
 
-The CSS class names, element structure and `data-` attribute names in the rendered markup
-are glance's, necessarily: the port reuses glance's stylesheet, and a stylesheet only lays
-out the markup it was written for. `copied_strings.py` names fourteen shorter strings that
-occur in both codebases, and they fall into three kinds:
+### `src/main/java/io/akka/glance/api/AssetEndpoint.java`
 
-- **Markup fragments in `WidgetRenderer.java`** — `<ul class="list list-gap-14
-  collapsible-container" data-collapse-after="`, `            <li
-  data-dynamic-relative-time="`, ` fill="none" viewBox="0 0 24 24" stroke-width="1.5">`,
-  and the closing tags `    </li>`, `        </ul>`, `    </div>` and `
-    </div>
-`.
-  These are glance's markup, reproduced deliberately and to its whitespace: the port
-  serves glance's stylesheet, and a class name or an indent that differed would lay the
-  page out differently. The `viewBox` fragment is the path of glance's own warning icon.
-  Reproduced here exactly as they appear in the rebuild, indentation and line breaks
-  included, because that is what makes them the same markup:
+The routes, the statuses and the cookie names a caller sees. A port that answered on different paths would not be a port.
 
-<pre>
-            <li data-dynamic-relative-time="
-        </ul>
+```text
+/manifest.json
+Cache-Control
+css/bundle.css
+public, max-age=
+```
 
-    </li>
 
- fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+### `src/main/java/io/akka/glance/api/AuthEndpoint.java`
 
-<ul class="list list-gap-14 collapsible-container" data-collapse-after="
-</pre>
+The routes, the statuses and the cookie names a caller sees. A port that answered on different paths would not be a port.
 
-- **Route paths** — `/api/set-theme/{key}` is glance's route, answered so that its theme
-  picker does not report a failure; `/api/widgets` is this port's own and shares the
-  phrase with glance's configuration vocabulary by coincidence.
-- **HTTP header names** — `If-None-Match`, `If-Modified-Since`, `Last-Modified`,
-  `User-Agent` and `Content-Type`. These are the names in RFC 9110. Two programs speaking
-  the same protocol share its vocabulary; neither took them from the other.
+```text
+/api/authenticate
+Retry-After
+```
 
-## Derived, with nothing copied
 
-The scheduler, the cache-deadline arithmetic, the retry backoff, the outcome classifier,
-the feed merge and the page refresh pass are reimplementations. No Go source was
-translated line by line; each rule was established by running the original and recorded in
-`glance-port/docs/question-log.md` before any of this was written. The behaviour is
-derived from glance and this port would not exist without it.
+### `src/main/java/io/akka/glance/api/ConfigEndpoint.java`
 
-## Also used
+The routes, the statuses and the cookie names a caller sees. A port that answered on different paths would not be a port.
 
-- Akka, and the Akka Java SDK.
+```text
+Config file is invalid: 
+```
+
+
+### `src/main/java/io/akka/glance/api/Requests.java`
+
+The routes, the statuses and the cookie names a caller sees. A port that answered on different paths would not be a port.
+
+```text
+Page not found
+X-Forwarded-For
+X-Forwarded-Proto
+{"error": "Unauthorized"}
+```
+
+
+### `src/main/java/io/akka/glance/app/Application.java`
+
+The defaults the application fills in, and the two page slugs it reserves.
+
+```text
+" is reserved
+app-icon.png
+default-dark
+default-light
+image/svg+xml
+initializing default theme: 
+initializing preset theme 
+secret-key must be exactly 
+```
+
+
+### `src/main/java/io/akka/glance/app/Site.java`
+
+The defaults the application fills in, and the two page slugs it reserves.
+
+```text
+page-content.html
+```
+
+
+### `src/main/java/io/akka/glance/auth/Sessions.java`
+
+The cookie's name and the lengths its parts have, which a token written by the original has to be readable by.
+
+```text
+secret key length is not 
+session_token
+signature does not match
+token has expired
+token length is invalid
+```
+
+
+### `src/main/java/io/akka/glance/cli/Cli.java`
+
+The commands, their usage text and their messages, so that a script driving the original drives this.
+
+```text
+Config file is invalid: 
+Could not parse config file: 
+Failed to retrieve info for path 
+No sensors found
+Password cannot be empty
+Password must be at least 6 characters long
+Sensors found:
+Used percent: 
+config:print
+config:validate
+mountpoint:info
+password:hash
+secret:make
+sensors:print
+unknown command: 
+```
+
+
+### `src/main/java/io/akka/glance/cli/Diagnostics.java`
+
+The commands, their usage text and their messages, so that a script driving the original drives this.
+
+```text
+/.dockerenv
+Glance version: 
+In Docker container: 
+Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:137.0) Gecko/20100101 Firefox/137.0
+User-Agent
+expected status code 
+fetch data from Docker Hub API
+fetch data from GitHub API
+fetch data from Hacker News Firebase API
+fetch data from Open-Meteo API
+fetch data from Reddit API
+fetch data from Twitch.tv GQL
+fetch data from Yahoo finance API
+fetch data from YouTube RSS feed
+resolve cloudflare.com through Cloudflare DoH
+resolve cloudflare.com through Google DoH
+resolve github.com
+resolve reddit.com
+resolve twitch.tv
+```
+
+
+### `src/main/java/io/akka/glance/config/Config.java`
+
+The configuration file's own key names, its variable syntax and the messages it refuses a file with.
+
+```text
+app-background-color
+app-icon-url
+assets-path
+center-vertically
+custom-css-file
+custom-footer
+desktop-navigation-width
+disable-picker
+favicon-url
+head-widgets
+hide-desktop-navigation
+hide-footer
+password-hash
+secret-key
+show-mobile-header
+```
+
+
+### `src/main/java/io/akka/glance/config/ConfigLoader.java`
+
+The configuration file's own key names, its variable syntax and the messages it refuses a file with.
+
+```text
+ has more than 3 columns
+ has no columns
+ has no name
+ is slim and cannot have more than 2 columns
+ must be at least 6 characters
+ must have a password or a password-hash set
+ must have either 1 or 2 full width columns
+: desktop-navigation-width can only be either wide or slim
+: size can only be either small or full
+: width can only be either wide or slim
+assets directory does not exist: 
+no pages configured
+secret-key must be set when users are configured
+the password for 
+user has no name
+usernames must be at least 3 characters
+```
+
+
+### `src/main/java/io/akka/glance/config/ConfigVariables.java`
+
+The configuration file's own key names, its variable syntax and the messages it refuses a file with.
+
+```text
+ is not absolute
+ not found
+/run/secrets
+^[A-Z0-9_]+$
+readFileFromEnv
+```
+
+
+### `src/main/java/io/akka/glance/config/CustomIcon.java`
+
+The configuration file's own key names, its variable syntax and the messages it refuses a file with.
+
+```text
+auto-invert 
+```
+
+
+### `src/main/java/io/akka/glance/config/DurationField.java`
+
+The configuration file's own key names, its variable syntax and the messages it refuses a file with.
+
+```text
+invalid duration format: 
+```
+
+
+### `src/main/java/io/akka/glance/config/HslColor.java`
+
+The configuration file's own key names, its variable syntax and the messages it refuses a file with.
+
+```text
+HSL hue must be between 0 and 
+HSL lightness must be between 0 and 
+HSL saturation must be between 0 and 
+invalid HSL color format: 
+```
+
+
+### `src/main/java/io/akka/glance/config/Includes.java`
+
+The configuration file's own key names, its variable syntax and the messages it refuses a file with.
+
+```text
+(?m)^([ \t]*)(?:-[ \t]*)?(?:!|\$)include:[ \t]*(.+)$
+recursion depth limit of 
+```
+
+
+### `src/main/java/io/akka/glance/config/OrderedYamlMap.java`
+
+The configuration file's own key names, its variable syntax and the messages it refuses a file with.
+
+```text
+keys and values must have the same length
+orderedMap: duplicate key 
+```
+
+
+### `src/main/java/io/akka/glance/config/ProxyOptions.java`
+
+The configuration file's own key names, its variable syntax and the messages it refuses a file with.
+
+```text
+allow-insecure
+parsing proxy URL: 
+```
+
+
+### `src/main/java/io/akka/glance/config/QueryParameters.java`
+
+The configuration file's own key names, its variable syntax and the messages it refuses a file with.
+
+```text
+invalid query parameter value type: 
+```
+
+
+### `src/main/java/io/akka/glance/config/ThemeProperties.java`
+
+The configuration file's own key names, its variable syntax and the messages it refuses a file with.
+
+```text
+background-color
+contrast-multiplier
+negative-color
+positive-color
+primary-color
+text-saturation-multiplier
+theme-preset-preview.html
+theme-style.gotmpl
+```
+
+
+### `src/main/java/io/akka/glance/gotemplate/Escaper.java`
+
+The markers Go's own escaper writes for a value it will not emit.
+
+```text
+background
+```
+
+
+### `src/main/java/io/akka/glance/gotemplate/Escapers.java`
+
+The markers Go's own escaper writes for a value it will not emit.
+
+```text
+expression
+```
+
+
+### `src/main/java/io/akka/glance/gotemplate/Executor.java`
+
+The markers Go's own escaper writes for a value it will not emit.
+
+```text
+ not defined
+: function 
+```
+
+
+### `src/main/java/io/akka/glance/gotemplate/Parser.java`
+
+The markers Go's own escaper writes for a value it will not emit.
+
+```text
+: expected 
+```
+
+
+### `src/main/java/io/akka/glance/net/Endpoints.java`
+
+The addresses of the services the widgets read from, the user agent the original identifies itself as, and the pattern that reads reddit's challenge page.
+
+```text
+hacker-news
+kimne78kx3ncx6brgo4mv6wki5h1ko
+open-meteo
+```
+
+
+### `src/main/java/io/akka/glance/net/HttpClients.java`
+
+The addresses of the services the widgets read from, the user agent the original identifies itself as, and the pattern that reads reddit's challenge page.
+
+```text
+.0) Gecko/20100101 Firefox/
+Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:
+```
+
+
+### `src/main/java/io/akka/glance/net/RedditAccess.java`
+
+The addresses of the services the widgets read from, the user agent the original identifies itself as, and the pattern that reads reddit's challenge page.
+
+```text
+ when requesting challenge page
+ when submitting challenge solution
+User-Agent
+await\(async \w+\s*=>\s*\w+\s*\+\s*\w+\)\("([^"]+)"\)
+name="token"\s+value="([^"]+)"
+no JS challenge found
+no loid cookie found
+no token found in challenge page
+unexpected status code 
+```
+
+
+### `src/main/java/io/akka/glance/net/Requests.java`
+
+The addresses of the services the widgets read from, the user agent the original identifies itself as, and the pattern that reads reddit's challenge page.
+
+```text
+ +https://github.com/glanceapp/glance
+, response: 
+unexpected status code 
+```
+
+
+### `src/main/java/io/akka/glance/net/UnixSocketHttp.java`
+
+The addresses of the services the widgets read from, the user agent the original identifies itself as, and the pattern that reads reddit's challenge page.
+
+```text
+User-Agent: 
+```
+
+
+### `src/main/java/io/akka/glance/render/CustomApiFuncs.java`
+
+The names of the fifty functions a custom-api template may call, and of the ten every template may.
+
+```text
+Content-Type
+Unauthorized
+allow-insecure
+body must be a string when body-type is 'string'
+data-dynamic-relative-time="
+findSubmatch
+formatTime
+getResponse
+invalid body type, must be either 'json' or 'string'
+invalid response JSON
+newRequest
+parameters
+parseLocalTime
+parseRelativeTime
+percentChange
+replaceAll
+replaceMatches
+skip-json-validation
+sortByFloat
+sortByString
+sortByTime
+startOfDay
+toRelativeTime
+trimPrefix
+trimSuffix
+withAllowInsecure
+withHeader
+withParameter
+withStringBody
+```
+
+
+### `src/main/java/io/akka/glance/render/Templates.java`
+
+The names of the fifty functions a custom-api template may call, and of the ten every template may.
+
+```text
+data-dynamic-relative-time="
+dynamicRelativeTimeAttrs
+formatApproxNumber
+formatNumber
+formatPrice
+formatPriceWithPrecision
+formatServerMegabytes
+```
+
+
+### `src/main/java/io/akka/glance/sysinfo/Sysinfo.java`
+
+The JSON field names a remote agent answers with, so that a glance instance and this one can act as each other's agent.
+
+```text
+ not found
+CPU temperature sensor 
+coretemp_package_id_0
+cpu_thermal
+getting filesystem usage for 
+getting filesystems: 
+getting host info: 
+getting load avg: 
+getting memory info: 
+getting sensor readings: 
+```
+
+
+### `src/main/java/io/akka/glance/sysinfo/SystemInfo.java`
+
+The JSON field names a remote agent answers with, so that a glance instance and this one can act as each other's agent.
+
+```text
+host_info_is_available
+load15_percent
+load1_percent
+load_is_available
+memory_is_available
+mountpoints
+swap_is_available
+swap_total_mb
+swap_used_mb
+swap_used_percent
+temperature_c
+temperature_is_available
+used_percent
+```
+
+
+### `src/main/java/io/akka/glance/sysinfo/SystemInfoRequest.java`
+
+The JSON field names a remote agent answers with, so that a glance instance and this one can act as each other's agent.
+
+```text
+cpu-temp-sensor
+hide-mountpoints-by-default
+mountpoints
+```
+
+
+### `src/main/java/io/akka/glance/util/Assets.java`
+
+The formats a feed's date is written in, and the units a size is shown in.
+
+```text
+(?m)^@import "(.*?)";$
+css/main.css
+maximum import depth reached, is one of your imports circular?
+```
+
+
+### `src/main/java/io/akka/glance/util/Colors.java`
+
+The formats a feed's date is written in, and the units a size is shown in.
+
+```text
+#%02x%02x%02x
+```
+
+
+### `src/main/java/io/akka/glance/util/Feed.java`
+
+The formats a feed's date is written in, and the units a size is shown in.
+
+```text
+description
+```
+
+
+### `src/main/java/io/akka/glance/util/GoLayout.java`
+
+The formats a feed's date is written in, and the units a size is shown in.
+
+```text
+rfc3339nano
+```
+
+
+### `src/main/java/io/akka/glance/util/Numbers.java`
+
+The formats a feed's date is written in, and the units a size is shown in.
+
+```text
+ <span class="color-base size-h5">
+```
+
+
+### `src/main/java/io/akka/glance/widget/Err.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+failed to retrieve any content
+failed to retrieve some of the content
+```
+
+
+### `src/main/java/io/akka/glance/widget/Widget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+hide-header
+```
+
+
+### `src/main/java/io/akka/glance/widget/WidgetFactory.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+calendar-legacy
+change-detection
+custom-api
+docker-containers
+hacker-news
+repository
+server-stats
+split-column
+twitch-channels
+twitch-top-games
+unknown widget type: 
+widget 'type' property is empty or not specified
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/BookmarksWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+description
+hide-arrow
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/CalendarWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+first-day-of-week
+invalid first day of week
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/ChangeDetectionWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+/api/v1/watch
+/api/v1/watch/
+?from_version=
+Change Detection
+change-detection.html
+collapse-after
+could not fetch list of watch UUIDs: 
+could not get 
+date_created
+instance-url
+last_changed
+previous_md5
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/ClockWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+hour-format
+hour-format must be either 12h or 24h
+invalid timezone '
+missing timezone value
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/CustomApiWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+Custom API
+custom-api.html
+initializing primary request: 
+parsing template: 
+subrequests
+template is required
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/DnsStatsWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+ with message '
+&type=LastDay
+, message '
+/admin/api.php?summaryRaw&topItems&overTimeData10mins&auth=
+/api/dashboard/stats/get?token=
+/api/history
+/api/stats/summary
+/api/stats/top_domains?blocked=true
+/control/stats
+Authorization
+Content-Type
+TopBlockedDomains
+ads_blocked_today
+ads_over_time
+ads_percentage_today
+allow-insecure
+authentication request returned status 
+authentication response returned empty session ID, status code 
+avg_processing_time
+blockListZones
+blockedZones
+blocked_filtering
+checking session ID: 
+dns-stats.html
+dns_queries
+dns_queries_today
+domains_being_blocked
+domains_over_time
+fetching session ID: 
+fetching stats: 
+hide-graph
+hide-top-domains
+hour-format
+mainChartData
+missing API token
+num_blocked_filtering
+num_dns_queries
+parsing authentication response: 
+percent_blocked
+renewing session ID: 
+service must be one of: 
+session ID check request returned status 
+technitium
+topBlockedDomains
+top_blocked_domains
+totalBlocked
+totalQueries
+widget-base.html
+{"password":"
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/DockerContainersWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+(unhealthy)
+/containers/json?all=
+/var/run/docker.sock
+Docker Containers
+containers
+docker-containers.html
+fetching containers: 
+format-container-names
+glance.same-tab
+hide-by-default
+non-200 response status: 
+parsing URL: 
+running-only
+sending request to socket: 
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/ExtensionWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+URL is required
+Widget-Content-Frameless
+Widget-Content-Type
+Widget-Title
+Widget-Title-URL
+allow-potentially-dangerous-html
+fallback-content-type
+parameters
+parsing URL: 
+request failed: 
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/GroupWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+nested groups are not supported
+split columns inside of groups are not supported
+split-column
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/HackerNewsWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+Hacker News
+collapse-after
+comments-url-template
+could not fetch list of post IDs
+could not fetch some hacker news posts
+descendants
+engagement
+extra-sort-by
+forum-posts.html
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/IframeWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+parsing URL: 
+source is required
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/LobstersWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+collapse-after
+comment_count
+comments_url
+created_at
+custom-url
+forum-posts.html
+instance-url
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/MarketsWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+ market(s)
+/v8/finance/chart/
+?range=1mo&interval=1d
+User-Agent
+absolute-change
+chart-link
+chart-link-template
+could not fetch data for 
+indicators
+regularMarketPrice
+symbol-link
+symbol-link-template
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/MonitorWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+Authorization
+Client Error
+Server Error
+Unauthorized
+allow-insecure
+alt-status-codes
+basic-auth
+monitor-compact.html
+show-failing-only
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/OldCalendarWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+old-calendar.html
+start-sunday
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/RedditWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+ subreddit:
+/api/v1/access_token
+/search.json?
+Authorization
+Content-Type
+User-Agent
+access_token
+application name, client ID and client secret are required
+collapse-after
+comments-url-template
+could not solve reddit challenge
+crosspost_parent_list
+engagement
+expires_in
+extra-sort-by
+fetching new app access token: 
+forum-posts.html
+grant_type=client_credentials
+horizontal-cards
+link_flair_text
+no `{REQUEST-URL}` placeholder specified
+no posts found
+num_comments
+reddit-horizontal-cards.html
+reddit-vertical-cards.html
+request-url-template
+show-flairs
+show-thumbnails
+subreddit is required
+top-period
+vertical-cards
+widget-base.html
+{POST-PATH}
+{REQUEST-URL}
+{SUBREDDIT}
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/ReleasesWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+/api/v1/repos/
+/api/v4/projects/
+/releases/latest
+/releases/permalink/latest
+/repositories/
+/tags?name=
+/v2/namespaces/
+Authorization
+PRIVATE-TOKEN
+collapse-after
+could not get 
+gitlab-token
+include-prereleases
+invalid repository name: 
+invalid source
+no releases found for repository 
+no tags found for repository: 
+published_at
+released_at
+repositories
+repository
+repository is required
+show-source-icon
+tag_last_pushed
+unsupported source
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/RepositoryWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+&per_page=
+/commits?per_page=
+/search/issues?q=is:issue+is:open+repo:
+/search/issues?q=is:pr+is:open+repo:
+Authorization
+Repository
+commits-limit
+could not get PRs: 
+could not get commits: 
+could not get issues: 
+could not get repository details: 
+created_at
+forks_count
+issues-limit
+pull-requests-limit
+repository
+stargazers_count
+total_count
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/RssWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+ RSS feeds
+If-Modified-Since
+If-None-Match
+Last-Modified
+No items were returned from the feeds.
+User-Agent
+card-height
+collapse-after
+detailed-list
+hide-categories
+hide-description
+horizontal-cards
+horizontal-cards-2
+item-link-prefix
+preserve-order
+rss-detailed-list.html
+rss-horizontal-cards-2.html
+rss-horizontal-cards.html
+rss-list.html
+single-line-titles
+thumbnail-height
+unexpected status code 
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/SearchWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+ has no URL
+ has no shortcut
+duckduckgo
+perplexity
+placeholder
+search bang #
+search-engine
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/ServerStatsWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+/api/sysinfo/all
+Authorization
+Server Stats
+Unnamed server #
+server-stats.html
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/SplitColumnWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+Split Column
+max-columns
+split-column.html
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/TodoWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/TwitchChannelsWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+580ab410bcd0c1ad194224957ae2241e5d252b2c5173d8e0cce9d32d5bb14efe
+676ee2f834ede42eb4514cdb432b3134fefc12590080c9a2c9bb44a2a4a63266
+ChannelShell
+StreamMetadata
+Twitch Channels
+__typename
+channelLogin
+collapse-after
+displayName
+expected 2 operation responses, got 
+extensions
+failed to fetch 
+operationName
+persistedQuery
+profileImageURL
+sha256Hash
+twitch-channels.html
+unknown operation name: 
+userOrError
+viewersCount
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/TwitchTopGamesWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+2f67f71ba89f3c0ed26a141ec00da1defecb2303595f5cda4298169549783d9e
+BrowsePage_AllDirectories
+Top games on Twitch
+VIEWER_COUNT
+collapse-after
+directoriesWithTags
+extensions
+no categories could be retrieved
+operationName
+originalReleaseDate
+persistedQuery
+sha256Hash
+twitch-games-list.html
+viewersCount
+widget-base.html
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/VideosWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+/feeds/videos.xml?channel_id=
+/feeds/videos.xml?playlist_id=
+collapse-after
+collapse-after-rows
+grid-cards
+include-shorts
+missing videos from 
+vertical-list
+video-card-contents.html
+video-url-template
+videos-grid.html
+videos-vertical-list.html
+widget-base.html
+{VIDEO-ID}
+```
+
+
+### `src/main/java/io/akka/glance/widget/kind/WeatherWidget.java`
+
+The widget type names, the settings each accepts, the messages each refuses a setting with, the fields each reads out of somebody else's API, and the template files each renders.
+
+```text
+&count=20&language=en&format=json
+/v1/forecast?
+/v1/search?name=
+Freezing Rain
+Heavy Rain
+Heavy Snow
+Mainly Clear
+Moderate Rain
+Moderate Snow
+Partly Cloudy
+Snow Grains
+Thunderstorm
+United Kingdom
+United States
+apparent_temperature
+fahrenheit
+fetching places data: 
+forecast_days
+hide-location
+hour-format
+hour-format must be either 12h or 24h
+location is required
+no place found for 
+no places found for 
+precipitation_probability
+show-area-name
+sunrise,sunset
+temperature_2m
+temperature_2m,apparent_temperature,weather_code
+temperature_2m,precipitation_probability
+temperature_unit
+timeformat
+units must be either metric or imperial
+weather_code
+widget-base.html
+```
+
+
+### `src/test/java/io/akka/glance/api/ServerIntegrationTest.java`
+
+The original's own words, quoted in a test so that the test fails if the rebuild stops using them.
+
+```text
+/api/authenticate
+/api/healthz
+/css/bundle.css
+/manifest.json
+Page not found
+Unauthorized
+function setupPage
+no pages configured
+```
+
+
+### `src/test/java/io/akka/glance/cli/CliTest.java`
+
+The original's own words, quoted in a test so that the test fails if the rebuild stops using them.
+
+```text
+- type: calendar
+- type: calendar
+
+Could not parse config file:
+Failed to retrieve info for path
+Password cannot be empty
+Password must be at least 6
+Used percent:
+config:print
+config:validate
+mountpoint:info
+password:hash
+secret:make
+sensors:print
+```
+
+
+### `src/test/java/io/akka/glance/config/ConfigTest.java`
+
+The original's own words, quoted in a test so that the test fails if the rebuild stops using them.
+
+```text
+/run/secrets
+no pages configured
+widget 'type' property is empty or not specified
+```
+
+
+### `src/test/java/io/akka/glance/widget/WidgetFetchTest.java`
+
+The original's own words, quoted in a test so that the test fails if the rebuild stops using them.
+
+```text
+- type: change-detection
+  instance-url: 
+- type: dns-stats
+  service: adguard
+  url: 
+- type: hacker-news
+
+- type: rss
+  feeds:
+    - url: 
+/geocoding
+Content-Type
+failed to retrieve any content
+pages:
+  - name: Home
+    columns:
+      - size: full
+        widgets:
+
+```
+
+

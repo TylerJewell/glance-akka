@@ -2,35 +2,40 @@ package io.akka.glance.application;
 
 import akka.javasdk.annotations.Component;
 import akka.javasdk.keyvalueentity.KeyValueEntity;
-import java.util.List;
+import akka.javasdk.keyvalueentity.KeyValueEntityContext;
 
 /**
- * Which pages the site has, in the order the navigation lists them.
+ * The configuration this instance is running, kept where a restart can find it.
  *
- * <p>The original reads this out of the same configuration file the pages come from, so its
- * shell can draw a link per page on every page. Held separately here because a page does not
- * otherwise need to know about its siblings.
+ * <p>The original reads a file and holds the result in memory; a restart re-reads the file. A
+ * configuration set through the API has nowhere to be re-read from, so it is kept here.
  */
 @Component(id = "site")
-public class SiteEntity extends KeyValueEntity<SiteEntity.Site> {
+public class SiteEntity extends KeyValueEntity<SiteEntity.State> {
 
-  /** The one instance: a service serves one site. */
-  public static final String ID = "site";
+  /** The only identifier this entity has: there is one configuration. */
+  public static final String ID = "current";
 
-  public record Link(String slug, String title) {}
+  /** The configuration's own text, and when it was put there. */
+  public record State(String yaml, String loadedAt) {}
 
-  public record Site(List<Link> pages) {}
+  public SiteEntity(KeyValueEntityContext context) {}
 
   @Override
-  public Site emptyState() {
-    return new Site(List.of());
+  public State emptyState() {
+    return new State("", "");
   }
 
-  public Effect<Site> configure(Site site) {
-    return effects().updateState(new Site(List.copyOf(site.pages()))).thenReply(site);
+  public Effect<Done> set(State state) {
+    return effects().updateState(state).thenReply(Done.INSTANCE);
   }
 
-  public ReadOnlyEffect<Site> get() {
+  public ReadOnlyEffect<State> get() {
     return effects().reply(currentState());
+  }
+
+  /** What a command that only writes replies with. */
+  public enum Done {
+    INSTANCE
   }
 }

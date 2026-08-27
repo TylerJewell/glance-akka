@@ -1,0 +1,4 @@
+# What this project ships that it did not write. One path per line, reason after the '#'.
+src/main/resources/glance/static  # RENDERING.md R3: glanceapp/glance's own front end - CSS, JS, fonts and icons - shipped verbatim and repointed at this rebuild's endpoints.
+src/main/resources/glance/templates  # RENDERING.md R3: glanceapp/glance's own html/template files, rendered here by io.akka.glance.gotemplate rather than transcribed.
+src/main/resources/glance/default.yml  # glanceapp/glance's own docs/glance.yml, shipped as the configuration a fresh install starts from.

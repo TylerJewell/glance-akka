@@ -11,4 +11,41 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>glance-akka</name>
+
+    <dependencies>
+        <!-- The configuration file is YAML, and its custom field types need the node tree
+             rather than a mapping to classes, which is what the compose API gives. -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <!-- The original hashes and checks passwords with bcrypt, and a session has to
+             survive a config written by the original's own password:hash command. -->
+        <dependency>
+            <groupId>at.favre.lib</groupId>
+            <artifactId>bcrypt</artifactId>
+            <version>0.10.2</version>
+        </dependency>
+        <!-- The server-stats widget reports the machine it runs on: load, memory, swap,
+             temperature and filesystems. This is the counterpart of the gopsutil package
+             the original reads all of that through. -->
+        <dependency>
+            <groupId>com.github.oshi</groupId>
+            <artifactId>oshi-core</artifactId>
+            <version>6.9.1</version>
+        </dependency>
+        <!-- Pinned to what the Akka runtime carries, which takes precedence on the
+             classpath in a platform deployment. -->
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna-platform</artifactId>
+            <version>5.17.0</version>
+        </dependency>
+    </dependencies>
 </project>
