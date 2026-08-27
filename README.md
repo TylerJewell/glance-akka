@@ -45,9 +45,9 @@ Full method and the numbers that did *not* make this list:
 
 ## What it took to build
 
-⏱️ **88.9 hours** from the first command to the published repository, **6.9** of them active<br>
-💬 **1,977** exchanges with the model<br>
-✍️ **1,647,676** tokens written by the model, **742,589,374** counting everything sent and re-sent<br>
+⏱️ **89.5 hours** from the first command to the published repository, **7.1** of them active<br>
+💬 **2,048** exchanges with the model<br>
+✍️ **1,707,803** tokens written by the model, **764,264,360** counting everything sent and re-sent<br>
 🙋 **0** questions to a human<br>
 🧪 **141** tests
 
