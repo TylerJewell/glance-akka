@@ -6,21 +6,23 @@ This repository holds two kinds of code and they are not under the same licence.
 
 Everything outside the vendored trees listed below was written for this project. It is a
 clean-room implementation: written against a specification derived by running
-[glanceapp/glance](https://github.com/glanceapp/glance) and recording what it does, not by translating
-its source. See `../glance-port/specs/SPEC-001-glance.md` for the rules it was built to, and `ACKNOWLEDGEMENTS.md` for the
+[glanceapp/glance](https://github.com/glanceapp/glance) and recording what it does, not by translating its
+source. See `../glance-port/specs/SPEC-001-glance.md` for the rules it was built to, and `ACKNOWLEDGEMENTS.md` for the
 places any text was carried across and why.
 
-It is licensed under the Apache License 2.0. See `LICENSE`.
+It is licensed under the Apache License 2.0, Copyright 2026 Tyler Jewell. See `LICENSE`
+and `NOTICE`.
 
 ## The interface — AGPL-3.0, as glanceapp/glance licensed it
 
+- `src/main/resources/glance/default.yml`
 - `src/main/resources/glance/static/`
 - `src/main/resources/glance/templates/`
 
-That code was written by the glanceapp/glance project and is shipped here **verbatim**, reused
-rather than rebuilt, per this harness's RENDERING.md R3. It remains under the licence its
-authors chose, unmodified, in `LICENSE-glance` and beside the code itself. Nothing
-about this repository relicenses it.
+That code was written by the glanceapp/glance project, Copyright the glanceapp/glance authors, and is shipped
+here **verbatim**, reused rather than rebuilt, per this harness's RENDERING.md R3. It
+remains under the licence its authors chose, unmodified, in `LICENSE-glance` and beside
+the code itself. Nothing about this repository relicenses it.
 
 ## Why the split
 

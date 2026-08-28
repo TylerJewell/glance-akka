@@ -1,0 +1,21 @@
+glance-akka
+Copyright 2026 Tyler Jewell
+
+This software was written for the Akka Specify port experiment and is licensed
+under the Apache License, Version 2.0. See LICENSE.
+
+It is a clean-room implementation: written against a specification derived by
+running glanceapp/glance and recording what it does, not by translating its source.
+
+Portions of this repository are NOT covered by that licence. The following trees
+are reused verbatim from glanceapp/glance (https://github.com/glanceapp/glance):
+
+    src/main/resources/glance/default.yml
+    src/main/resources/glance/static/
+    src/main/resources/glance/templates/
+
+    Copyright the glanceapp/glance authors
+    Licensed under AGPL-3.0
+
+Those files remain under the licence their authors chose. Nothing in this
+repository relicenses them. See LICENSING.md and .vendored.
